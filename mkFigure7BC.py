@@ -194,8 +194,8 @@ def main():
 
     # save figure
     plt.tight_layout()
-    plt.savefig(root + 'visualization/Fig7B', dpi=300)
-    plt.savefig(root + 'visualization/Fig7B.svg')
+    plt.savefig(root + 'visualization/Fig7BC', dpi=300)
+    plt.savefig(root + 'visualization/Fig7BC.svg')
     # plt.close()
 
 
