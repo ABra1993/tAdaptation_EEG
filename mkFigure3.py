@@ -22,7 +22,6 @@ fontsize_tick           = 10
 
 ##### SET directories
 root                = '/home/amber/OneDrive/code/nAdaptation_EEG_git/'
-root_data           = '/home/amber/OneDrive/data/EEG/'
 
 # initiate figure
 fig, axs = plt.subplots(1, 2, figsize=(10, 3))
@@ -30,15 +29,9 @@ fig, axs = plt.subplots(1, 2, figsize=(10, 3))
 # settings for plotting
 sns.despine(offset=10)
 
-# foloder
-folder = 'dataCollection2024/pilot4'
-
-# subjects
-exclude = []
-
 # retrieve files
-files = sorted(glob.glob(root_data + 'behaviour/' + folder +'/*.txt'))
-print(root_data + 'behaviour/' + folder)
+files = sorted(glob.glob(root + 'data/behaviour/raw/*.txt'))
+# print(files)
 
 # info experimental settings
 adapters            = ['blank', 'same', 'different']
@@ -50,11 +43,11 @@ target              = [3, 6, 8, 9]
 target_n            = len(target)
 
 # initiate dataframe to store data
-accu_clean          = np.zeros(len(files)-len(exclude))
-accu                = np.zeros((len(files)-len(exclude), len(contrasts), len(adapters)))
+accu_clean          = np.zeros(len(files))
+accu                = np.zeros((len(files), len(contrasts), len(adapters)))
 
-rTime_clean         = np.zeros(len(files)-len(exclude))
-rTime               = np.zeros((len(files)-len(exclude), len(contrasts), len(adapters)))
+rTime_clean         = np.zeros(len(files))
+rTime               = np.zeros((len(files), len(contrasts), len(adapters)))
 print(rTime.shape)
 
 # initiate counts
@@ -124,8 +117,8 @@ for i in range(2): # accuracy (i == 0) and reaction time (i == 1)
     # initiate dataframe
     df_stats = pd.DataFrame()
     df_stats['subject'] = np.tile(subject_str, len(adapters)*len(contrasts))
-    df_stats['contrast'] = np.repeat(contrasts, len(adapters)*(len(files)-len(exclude)))
-    df_stats['adapter'] = np.tile(np.repeat(adapters, len(files)-len(exclude)), len(contrasts_values))
+    df_stats['contrast'] = np.repeat(contrasts, len(adapters)*(len(files)))
+    df_stats['adapter'] = np.tile(np.repeat(adapters, len(files)), len(contrasts_values))
     df_stats['dependentVar'] = 0
     print(df_stats)
 

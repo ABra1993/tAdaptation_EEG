@@ -1,4 +1,6 @@
 __pycache__/*
 data/*
-models/*
-scripts/*
+models/__pycache__
+models/weights
+models/dataset
+visualization/*
