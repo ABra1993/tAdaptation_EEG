@@ -41,13 +41,13 @@ def main():
     dataset = 'mnist'
 
     # determine manipulation
-    values  = np.arange(0, 7, dtype=int)
+    values  = np.arange(0, 8, dtype=int)
 
     # network initliaizations
     init            = 5
 
     # preload dataframe
-    preload = False
+    preload = True
 
     if preload == False:
 
@@ -118,6 +118,7 @@ def main():
 
                     # add to accuracies
                     accu[iT, iInit, iV] = (accu_origin - np.mean(accu_current)) * 100
+                    accu[iT, iInit, iV] = (accu_origin - np.mean(accu_current)) * 100
 
         # save accuracies
         np.save(root + 'models/robustness', accu)
@@ -187,12 +188,12 @@ def main():
         # plot accuracies
         for iV in range(len(values)):
             if iV == len(values) - 1:
-                axs[0].bar(x[iV], data_mean[iV], color=cmap[iT], edgecolor='red', width=barWidth, label=current_tempDynamic, alpha=0.45+0.09*iV)
-                axs[0].plot([x[iV], x[iV]], [data_mean[iV] - data_std[iV], data_mean[iV] + data_std[iV]], color='black', alpha=0.45+0.09*iV)
+                axs[0].bar(x[iV], data_mean[iV], color=cmap[iT], edgecolor='red', width=barWidth, label=current_tempDynamic, alpha=0.45+0.07*iV)
+                axs[0].plot([x[iV], x[iV]], [data_mean[iV] - data_std[iV], data_mean[iV] + data_std[iV]], color='black', alpha=0.45+0.07*iV)
                 axs[0].scatter(np.ones(init)*x[iV], accu[iT, :, iV], color='grey', s=3, alpha=0.7)
             else:
-                axs[0].bar(x[iV], data_mean[iV], color=cmap[iT], width=barWidth, label=current_tempDynamic, alpha=0.45+0.09*iV)
-                axs[0].plot([x[iV], x[iV]], [data_mean[iV] - data_std[iV], data_mean[iV] + data_std[iV]], color='black', alpha=0.45+0.09*iV)
+                axs[0].bar(x[iV], data_mean[iV], color=cmap[iT], width=barWidth, label=current_tempDynamic, alpha=0.45+0.07*iV)
+                axs[0].plot([x[iV], x[iV]], [data_mean[iV] - data_std[iV], data_mean[iV] + data_std[iV]], color='black', alpha=0.45+0.07*iV)
                 axs[0].scatter(np.ones(init)*x[iV], accu[iT, :, iV], color='grey', s=3, alpha=0.7)
 
     print(np.array(xtick_idx).flatten())
@@ -216,10 +217,15 @@ def main():
     plt.savefig(root + 'visualization/Fig9.svg')
 
     # statistical testing
-    iV = -1
-    res = f_oneway(accu[0, :, iV], accu[1, :, iV], accu[2, :, iV], accu[3, :, iV])
+    # iV = -1
+    # res = f_oneway(accu[0, :, iV], accu[1, :, iV], accu[2, :, iV], accu[3, :, iV])
+    # print(res)
+    # res = tukey_hsd(accu[0, :, iV], accu[1, :, iV], accu[2, :, iV], accu[3, :, iV])
+    # print(res)
+
+    res = f_oneway(accu[0, :, :].mean(1), accu[1, :, :].mean(1), accu[2, :, :].mean(1), accu[3, :, :].mean(1))
     print(res)
-    res = tukey_hsd(accu[0, :, iV], accu[1, :, iV], accu[2, :, iV], accu[3, :, iV])
+    res = tukey_hsd(accu[0, :, :].mean(1), accu[1, :, :].mean(1), accu[2, :, :].mean(1), accu[3, :, :].mean(1))
     print(res)
 
 

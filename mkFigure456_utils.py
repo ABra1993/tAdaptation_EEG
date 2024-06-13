@@ -258,7 +258,7 @@ def visualizeAdapter(data, t, n_sub, channelNames_current, electrode_idx, adapte
             timepoints[count, 1] = end
 
             # visualize
-            axs[1].axvspan(start, end, facecolor='grey', alpha=0.1, edgecolor='white')
+            axs[1].axvspan(start, end, facecolor='lightsalmon', alpha=0.3, edgecolor='white')
             # axs[1].axvline(start, color='grey', linestyle='dotted')
             # axs[1].axvline(end, color='grey', linestyle='dotted')
 
@@ -284,7 +284,7 @@ def visualizeAdapter(data, t, n_sub, channelNames_current, electrode_idx, adapte
         data_std = np.nanstd(np.nanmean(np.nanmean(np.nanmean(data_current, 0), 1), 1), 0)/math.sqrt(n_sub)
 
         # plot
-        print(data_mean)
+        # print(data_mean)
         axs[1].plot(t, data_mean, label=adapter, color=color[iA+1], lw=2)
         axs[1].fill_between(t, data_mean - data_std, data_mean + data_std, alpha=0.2, color=color[iA+1])
 
@@ -329,6 +329,7 @@ def visualizeAdapter(data, t, n_sub, channelNames_current, electrode_idx, adapte
     for iT in range(count):
         x_ticklabels.append(str(np.round(timepoints[iT, 0], 2)) + ' s - ' + str(np.round(timepoints[iT, 1], 2)) + ' s')
     # print(x_ticklabels)
+    print(timepoints*1000)
 
     # adjust axes
     for i in range(3):
@@ -346,7 +347,7 @@ def visualizeAdapter(data, t, n_sub, channelNames_current, electrode_idx, adapte
             axs[i].ticklabel_format(axis='y', style='sci', scilimits=(0,0))
         elif i == 1:
             axs[i].axvline(0, color='lightgrey', lw=0.5, zorder=-10)
-            axs[i].set_ylabel('adapter - none \n ERP amplitude ($\mu$V)', fontsize=fontsize_label)
+            axs[i].set_ylabel('adapter - blank \n ERP amplitude ($\mu$V)', fontsize=fontsize_label)
             axs[i].set_xlabel('Time (s)', fontsize=fontsize_label)
             axs[i].ticklabel_format(axis='y', style='sci', scilimits=(0,0))
         elif i == 2:

@@ -8,7 +8,8 @@ from mkFigure456_utils import *
 dir        = '/home/amber/OneDrive/code/nAdaptation_EEG_git/'
 
 # set figure: ['Fig4A', 'Fig4B', 'Fig4C', 'Fig4D', 'Fig5A', 'Fig5B', 'Fig5C', 'Fig5D', 'Fig6AB']
-fig_names = ['Fig4A', 'Fig4B', 'Fig4C', 'Fig4D', 'Fig5A', 'Fig5B', 'Fig5C', 'Fig5D', 'Fig6AB']
+# fig_names = ['Fig4A', 'Fig4B', 'Fig4C', 'Fig4D', 'Fig5A', 'Fig5B', 'Fig5C', 'Fig5D', 'Fig6AB']
+fig_names = ['Fig4C', 'Fig4D']
 
 # montage
 fname = dir + 'config/chs.tsv'
