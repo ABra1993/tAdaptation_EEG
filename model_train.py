@@ -47,13 +47,14 @@ def main():
     start           = [0, 2]
 
     # hyperparameter specification
-    init            = 5
+    init            = 10
     numepchs        = 10
     batch_size      = 100
     lr              = 0.001
 
     # tempDynamics ['none', 'add_supp', 'div_norm', 'lat_recurrence', 'lat_recurrence_mult']
-    tempDynamics            = ['none', 'add_supp', 'div_norm', 'lat_recurrence', 'lat_recurrence_mult']
+    # tempDynamics            = ['none', 'add_supp', 'div_norm', 'lat_recurrence', 'lat_recurrence_mult']
+    tempDynamics = ['add_supp']
 
     # print summary 
     print(30*'--')

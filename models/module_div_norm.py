@@ -15,11 +15,6 @@ class module_div_norm(nn.Module):
         self.K          = nn.Parameter(torch.Tensor([0.1]), requires_grad=True)
         self.alpha      = nn.Parameter(torch.Tensor([0.5]), requires_grad=True)
         self.sigma      = nn.Parameter(torch.Tensor([1]), requires_grad=True)
-
-        # # parameters
-        # self.K          = nn.Parameter(torch.Tensor([K]), requires_grad=True)
-        # self.alpha      = nn.Parameter(torch.Tensor([alpha]), requires_grad=True)
-        # self.sigma      = nn.Parameter(torch.Tensor([sigma]), requires_grad=True)
     
     def update_g(self, g_previous, x_previous):
         """ Update feedback signal """

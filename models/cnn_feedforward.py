@@ -104,11 +104,13 @@ class cnn_feedforward(nn.Module):
         actvsc1 = {}
         actvsc2 = {}
         actvsc3 = {}
+        fc1     = {}
 
         self.actvs = {}
         self.actvs[0] = actvsc1
         self.actvs[1] = actvsc2
         self.actvs[2] = actvsc3
+        self.actvs[3] = fc1
 
         # initiate feedback states (idle with no temporal dynamics and lateral recurrence)
         g1 = {}
@@ -148,6 +150,7 @@ class cnn_feedforward(nn.Module):
 
         # fc1
         x = self.fc1(x)
+        self.actvs[3][0] = x
 
         if self.t_steps > 0:
             for t in range(self.t_steps-1):
@@ -185,6 +188,7 @@ class cnn_feedforward(nn.Module):
                 # fc1
                 x = x.view(x.size(0), -1)
                 x = self.fc1(x)
+                self.actvs[3][t+1] = x
 
         # compute output
         outp = self.decoder(x)

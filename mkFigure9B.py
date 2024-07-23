@@ -21,7 +21,7 @@ from torch.autograd import Variable as var
 # models
 from models.cnn_feedforward import cnn_feedforward
 from model_train_utils import *
-from mkFigure9_utils import *
+from mkFigure9B_utils import *
 
 
 # define root
@@ -44,7 +44,7 @@ def main():
     values  = np.arange(0, 8, dtype=int)
 
     # network initliaizations
-    init            = 5
+    init            = 10
 
     # preload dataframe
     preload = True
@@ -139,8 +139,9 @@ def main():
     fontsize_ticks      = 15
 
     # visualize different contrast levels for repeated trials
-    cmap = plt.cm.get_cmap('Set2')
-    cmap = ['#8cb369', '#f4a259', '#5b8e7d', '#bc4b51']
+    # cmap = plt.cm.get_cmap('Set2')
+    cmap = ['#ACD39E', '#E49C39', '#225522', '#DF4828']
+    # cmap = ['#4477AA', '#228833', '#66CCEE', '#CCBB44']
     start = 0
 
     sns.despine(offset=10)
@@ -151,9 +152,6 @@ def main():
     fontsize_legend     = 10
     fontsize_title      = 15
     fontsize_ticks      = 15
-
-    # visualize different contrast levels for repeated trials
-    cmap = ['#8cb369', '#f4a259', '#5b8e7d', '#bc4b51']
 
     # visualize
     for iT, current_tempDynamic in enumerate(tempDynamics):
@@ -187,11 +185,11 @@ def main():
 
         # plot accuracies
         for iV in range(len(values)):
-            if iV == len(values) - 1:
-                axs[0].bar(x[iV], data_mean[iV], color=cmap[iT], edgecolor='red', width=barWidth, label=current_tempDynamic, alpha=0.45+0.07*iV)
-                axs[0].plot([x[iV], x[iV]], [data_mean[iV] - data_std[iV], data_mean[iV] + data_std[iV]], color='black', alpha=0.45+0.07*iV)
-                axs[0].scatter(np.ones(init)*x[iV], accu[iT, :, iV], color='grey', s=3, alpha=0.7)
-            else:
+            # if iV == len(values) - 1:
+            #     axs[0].bar(x[iV], data_mean[iV], color=cmap[iT], edgecolor='red', width=barWidth, label=current_tempDynamic, alpha=0.45+0.07*iV)
+            #     axs[0].plot([x[iV], x[iV]], [data_mean[iV] - data_std[iV], data_mean[iV] + data_std[iV]], color='black', alpha=0.45+0.07*iV)
+            #     axs[0].scatter(np.ones(init)*x[iV], accu[iT, :, iV], color='grey', s=3, alpha=0.7)
+            # else:
                 axs[0].bar(x[iV], data_mean[iV], color=cmap[iT], width=barWidth, label=current_tempDynamic, alpha=0.45+0.07*iV)
                 axs[0].plot([x[iV], x[iV]], [data_mean[iV] - data_std[iV], data_mean[iV] + data_std[iV]], color='black', alpha=0.45+0.07*iV)
                 axs[0].scatter(np.ones(init)*x[iV], accu[iT, :, iV], color='grey', s=3, alpha=0.7)
@@ -213,20 +211,20 @@ def main():
 
     # save figure
     plt.tight_layout()
-    plt.savefig(root + 'visualization/Fig9', dpi=300)
-    plt.savefig(root + 'visualization/Fig9.svg')
+    plt.savefig(root + 'visualization/Fig9B', dpi=300)
+    plt.savefig(root + 'visualization/Fig9B.svg')
 
     # statistical testing
-    # iV = -1
-    # res = f_oneway(accu[0, :, iV], accu[1, :, iV], accu[2, :, iV], accu[3, :, iV])
-    # print(res)
-    # res = tukey_hsd(accu[0, :, iV], accu[1, :, iV], accu[2, :, iV], accu[3, :, iV])
-    # print(res)
+    iV = -1
+    res = f_oneway(accu[0, :, iV], accu[1, :, iV], accu[2, :, iV], accu[3, :, iV])
+    print(res)
+    res = tukey_hsd(accu[0, :, iV], accu[1, :, iV], accu[2, :, iV], accu[3, :, iV])
+    print(res)
 
-    res = f_oneway(accu[0, :, :].mean(1), accu[1, :, :].mean(1), accu[2, :, :].mean(1), accu[3, :, :].mean(1))
-    print(res)
-    res = tukey_hsd(accu[0, :, :].mean(1), accu[1, :, :].mean(1), accu[2, :, :].mean(1), accu[3, :, :].mean(1))
-    print(res)
+    # res = f_oneway(accu[0, :, :].mean(1), accu[1, :, :].mean(1), accu[2, :, :].mean(1), accu[3, :, :].mean(1))
+    # print(res)
+    # res = tukey_hsd(accu[0, :, :].mean(1), accu[1, :, :].mean(1), accu[2, :, :].mean(1), accu[3, :, :].mean(1))
+    # print(res)
 
 
 if __name__ == '__main__':

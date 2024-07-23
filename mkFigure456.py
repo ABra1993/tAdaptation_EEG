@@ -5,14 +5,14 @@ from mne.channels._standard_montage_utils import _read_theta_phi_in_degrees
 from mkFigure456_utils import *
 
 # set root directory
-dir        = '/home/amber/OneDrive/code/nAdaptation_EEG_git/'
+root        = '/home/amber/OneDrive/code/nAdaptation_EEG_git/'
 
 # set figure: ['Fig4A', 'Fig4B', 'Fig4C', 'Fig4D', 'Fig5A', 'Fig5B', 'Fig5C', 'Fig5D', 'Fig6AB']
 # fig_names = ['Fig4A', 'Fig4B', 'Fig4C', 'Fig4D', 'Fig5A', 'Fig5B', 'Fig5C', 'Fig5D', 'Fig6AB']
-fig_names = ['Fig4C', 'Fig4D']
+fig_names = ['Fig6AB']
 
 # montage
-fname = dir + 'config/chs.tsv'
+fname = root + 'config/chs.tsv'
 montage = _read_theta_phi_in_degrees(fname=fname, head_size=HEAD_SIZE_DEFAULT,
                                     fid_names=['Nz', 'LPA', 'RPA'],
                                     add_fiducials=False)
@@ -66,9 +66,9 @@ adapters                        = [adapter_clean, adapter_single, adapter_repeat
 img_types                       = [img_type_clean, img_type_single, img_type_repeated]
 
 # import data
-data_clean          = np.load(dir + 'data/EEG/data_clean_epochSelection.npy')
-data_single         = np.load(dir + 'data/EEG/data_single_epochSelection.npy')
-data_repeated       = np.load(dir + 'data/EEG/data_repeated_epochSelection.npy')
+data_clean          = np.load(root + 'data/EEG/data_clean_epochSelection.npy')
+data_single         = np.load(root + 'data/EEG/data_single_epochSelection.npy')
+data_repeated       = np.load(root + 'data/EEG/data_repeated_epochSelection.npy')
 data                = [data_clean, data_single, data_repeated]
 
 num_nan = np.sum(np.isnan(data_clean))
@@ -129,17 +129,23 @@ for fig in fig_names:
 
     # visualize
     if fig == 'Fig4A':
-        visualizeAdapter_topomap(data=[data[1], data[2]], montage=montage, info=info, dict=dict, adapters=adapter_single+adapter_repeated, fig_name=fig, dir=dir)
+        visualizeAdapter_topomap(data=[data[1], data[2]], montage=montage, info=info, dict=dict, adapters=adapter_single+adapter_repeated, fig_name=fig, dir=root)
     elif fig == 'Fig4B':
-        visualizeAdapter_topomap_diff(data=[data[1], data[2]], montage=montage, info=info, dict=dict, adapters=adapter_single+adapter_repeated, fig_name=fig, dir=dir)
+        visualizeAdapter_topomap_diff(data=[data[1], data[2]], montage=montage, info=info, dict=dict, adapters=adapter_single+adapter_repeated, fig_name=fig, dir=root)
     elif (fig == 'Fig4C') | (fig == 'Fig4D'):
-        visualizeAdapter(data=[data[1], data[2]], t=t, n_sub=n_sub, channelNames_current=channelNames_current, electrode_idx=electrode_idx, adapters=adapter_single+adapter_repeated, fig_name=fig, dir=dir)
+        visualizeAdapter(data=[data[1], data[2]], t=t, n_sub=n_sub, channelNames_current=channelNames_current, electrode_idx=electrode_idx, adapters=adapter_single+adapter_repeated, fig_name=fig, dir=root)
     elif (fig == 'Fig5A'):
-        visualizeContrast_topomap(data=[data[1], data[2]], montage=montage, info=info, dict=dict, contrasts=contrasts[1], fig_name=fig, dir=dir)
+        visualizeContrast_topomap(data=[data[1], data[2]], montage=montage, info=info, dict=dict, contrasts=contrasts[1], fig_name=fig, dir=root)
     elif (fig == 'Fig5B') | (fig == 'Fig5C') | (fig == 'Fig5D'):
-        visualizeContrast(data=[data[1], data[2]], t=t, n_sub=n_sub, channelNames_current=channelNames_current, electrode_idx=electrode_idx, contrasts=contrasts[1], contrasts_value=contrasts_value[1], fig_name=fig, dir=dir)
+        visualizeContrast(data=[data[1], data[2]], t=t, n_sub=n_sub, channelNames_current=channelNames_current, electrode_idx=electrode_idx, contrasts=contrasts[1], contrasts_value=contrasts_value[1], fig_name=fig, dir=root)
     elif (fig == 'Fig6AB'):
-        visualize_AdapterContrast(data=[data[1], data[2]], t=t, n_sub=n_sub, channelNames_current=channelNames_current, electrode_idx=electrode_idx, adapters=adapter_single+adapter_repeated, contrasts=contrast_repeated, contrasts_value=contrast_repeated_values, fig_name=fig, dir=dir)
+
+        # create figure
+        df_stats = visualize_AdapterContrast(data=[data[1], data[2]], t=t, n_sub=n_sub, channelNames_current=channelNames_current, electrode_idx=electrode_idx, adapters=adapter_single+adapter_repeated, contrasts=contrast_repeated, contrasts_value=contrast_repeated_values, fig_name=fig, dir=root)
+    
+        # save stats
+        df_stats.to_csv(root+'data/EEG/meanAmplitude_adapterContrast.csv', sep=',', index=0)
+
     else:
         print('Figure name does not exist...')
 

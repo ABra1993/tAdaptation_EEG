@@ -436,8 +436,8 @@ def visualizeContrast(data, t, n_sub, channelNames_current, electrode_idx, contr
     data_concat[:, :, :1, :, :, :]         = data[0]
     data_concat[:, :, 1:, :, :, :]         = data[1]
 
-    t_start     = np.argwhere(t > 0.29)[0][0] # tmin = -0.2
-    t_end       = np.argwhere(t > 0.31)[0][0] # tmin = -0.2
+    t_start     = np.argwhere(t > 0.280)[0][0] # tmin = -0.2
+    t_end       = np.argwhere(t > 0.320)[0][0] # tmin = -0.2
 
     # data to store response magnitude
     AUC = np.zeros((n_sub, len(contrasts)))
@@ -525,9 +525,8 @@ def visualizeContrast(data, t, n_sub, channelNames_current, electrode_idx, contr
 def visualize_AdapterContrast(data, t, n_sub, channelNames_current, electrode_idx, adapters, contrasts, contrasts_value, fig_name, dir):
 
     # timecourse to display
-    # print(t)
-    t_start     = np.argwhere(t > 0.25)[0][0]
-    t_end       = np.argwhere(t > 0.35)[0][0]
+    t_start     = np.argwhere(t > 0.280)[0][0] # tmin = -0.2
+    t_end       = np.argwhere(t > 0.320)[0][0] # tmin = -0.2
     # print(t_start)
 
     # initiate figure
@@ -537,7 +536,7 @@ def visualize_AdapterContrast(data, t, n_sub, channelNames_current, electrode_id
     data_concat = np.zeros((21, 5, 3, 32, 64, 154))
     data_concat[:, :, :1, :, :, :]         = data[0]
     data_concat[:, :, 1:, :, :, :]         = data[1]
-    print(data_concat.shape)
+    # print(data_concat.shape)
 
     # visualize different contrast levels for repeated trials
     cmap = plt.cm.get_cmap('cool')
@@ -554,6 +553,19 @@ def visualize_AdapterContrast(data, t, n_sub, channelNames_current, electrode_id
     offset_iC = [0, 3, 6, 9, 12]
     offset_iC = [0, 1, 2, 3, 4]
 
+    # create strings for subject
+    subject_str = []
+    for i in range(n_sub):
+        subject_str.append('sub' + str(i+1))
+
+    # initiate dataframe for lmer
+    df_stats = pd.DataFrame()
+    df_stats['subject'] = np.tile(subject_str, len(adapters)*len(contrasts))
+    df_stats['contrast'] = np.repeat(contrasts, len(adapters)*(n_sub))
+    df_stats['adapter'] = np.tile(np.repeat(adapters, n_sub), len(contrasts))
+    df_stats['dependentVar'] = 0
+    print(df_stats)
+
     # visualize absolute
     for iA, adapter in enumerate(adapters):
 
@@ -561,7 +573,9 @@ def visualize_AdapterContrast(data, t, n_sub, channelNames_current, electrode_id
 
             # select data
             data_current = data_concat[:, iC, iA, :, electrode_idx, :]
-            data_current = np.nanmean(np.nanmean(data_current, 0), 1)
+            # print(data_current.shape)
+            data_current = data_current.mean(0)
+            data_current = np.nanmean(data_current, 1)
 
             # reshape and average
             data_mean = np.nanmean(data_current, 0)
@@ -573,7 +587,13 @@ def visualize_AdapterContrast(data, t, n_sub, channelNames_current, electrode_id
 
             # compute respone magnitude
             for iS in range(n_sub):
-                AUC_abs[iA, iC, iS] = np.trapz(abs(data_current[iS, t_start:t_end]))
+
+                # compute
+                AUC_abs[iA, iC, iS] = np.mean(abs(data_current[iS, t_start:t_end]))
+
+                # add to dataframe
+                idx = df_stats[(df_stats.subject == subject_str[iS]) & (df_stats.contrast == contrast) & (df_stats.adapter == adapter)].index
+                df_stats.loc[idx, 'dependentVar'] = AUC_abs[iA, iC, iS]
 
             # AUC[:, iA, iC] = np.abs(AUC[:, iA, iC])
             mean            = np.nanmean(AUC_abs[iA, iC, :])
@@ -624,11 +644,14 @@ def visualize_AdapterContrast(data, t, n_sub, channelNames_current, electrode_id
         axs[1, i].set_xticklabels([' ', ' ', ' ', ' ', ' '])
         axs[1, i].set_xlabel('Contrast', fontsize=fontsize_label)
         if i == 0:
-            axs[1, i].set_ylabel('AUC', fontsize=fontsize_label)
+            axs[1, i].set_ylabel(r'Mean amplitude ($\mu$V)', fontsize=fontsize_label)
 
     # save figure
+    fig.align_ylabels()
     plt.tight_layout()
     plt.savefig(dir + 'visualization/' + fig_name, dpi=600)
     plt.savefig(dir + 'visualization/' + fig_name + '.svg')
+
+    return df_stats
 
 

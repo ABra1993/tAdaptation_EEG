@@ -130,8 +130,8 @@ def main():
 
     # save plot
     plt.tight_layout()
-    plt.savefig(root + 'visualization/Fig8A', dpi=300)
-    plt.savefig(root + 'visualization/Fig8A.svg')
+    plt.savefig(root + 'visualization/Fig9A', dpi=300)
+    plt.savefig(root + 'visualization/Fig9A.svg')
 
 if __name__ == '__main__':
     main()

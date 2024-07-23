@@ -55,7 +55,7 @@ def main():
     tempDynamics_label_stats    = ['feedforward', 'additive suppression', 'divisive normalization', 'lateral recurrence (add.)', 'lateral recurrence (mult.)']
 
     # noise
-    adapters                    = ['no', 'same', 'different']
+    adapters                    = ['none', 'same', 'different']
 
     # define contrast values
     contrasts                   = ['l_contrast', 'lm_contrast', 'm_contrast', 'mh_contrast', 'h_contrast']
@@ -69,7 +69,7 @@ def main():
     t_steps_label = encode_timesteps(t_steps, start=start, dur=dur)
 
     # other settings
-    init        = 5
+    init        = 10
     batch_size  = 100
 
     epochs      = [10]
@@ -91,7 +91,6 @@ def main():
     sub_n = len(files)
 
     # extract data
-    count = 0
     for iF, file in enumerate(files):
 
         # import datafile
@@ -145,7 +144,7 @@ def main():
 
                 for iInit in range(init):
 
-                    # save model
+                    # load model
                     model = cnn_feedforward(t_steps, current_tempDynamics)
                     model.initialize_tempDynamics()
                     model.load_state_dict(torch.load(root + 'models/weights/' + current_tempDynamics + '_' + str(iInit+1)))
@@ -186,7 +185,7 @@ def main():
     # color
     color_none          = plt.cm.get_cmap('tab20c')
     color_none          = color_none.colors[16:]
-    color_none          = 'lightgrey'
+    color_none          = 'darkgrey'
 
     color_same          = plt.cm.get_cmap('tab20c')
     color_same          = color_same.colors[:3]
@@ -194,34 +193,31 @@ def main():
     color_diff          = plt.cm.get_cmap('tab20b')
     color_diff          = color_diff.colors[8:11]
 
-    colors_adapt_beh    = [color_same[-1], color_diff[-1]]
+    colors_adapt_beh    = [color_none, color_same[-2], color_diff[-2]]
     colors_adapt        = [color_same[-2], color_diff[-2]]
-
-    # legend
-    lines       = list()
-    patchs      = list()
 
     sns.despine(offset=10)
 
     # axes settings
-    offset              = np.array([-0.02, 0.02])
+    offset              = np.array([-0.02, 0, 0.02])
     markersize          = 5
-    markersize_small    = 3
+    markersize_small    = 2
     lw                  = 0.5
 
     # PLOT HUMAN PERFORMANCE
-    for iA, adapter in enumerate(adapters[1:]):
+    for iA, adapter in enumerate(adapters):
         
         # retrieve accuracies
-        mean   = np.mean(accu_behaviour[:, :, iA+1], 1)
-        std    = np.std(accu_behaviour[:, :, iA+1], 1)/math.sqrt(sub_n)
+        mean   = np.mean(accu_behaviour[:, :, iA], 1)
+        std    = np.std(accu_behaviour[:, :, iA], 1)/math.sqrt(sub_n)
 
         # visualize     
         axs[0].plot([contrasts_value.numpy()+offset[iA], contrasts_value.numpy()+offset[iA]], [mean-std, mean+std], color=colors_adapt_beh[iA], zorder=-1)  
         axs[0].plot(contrasts_value.numpy()+offset[iA], mean, color=colors_adapt_beh[iA], label=adapter, marker='o', markeredgewidth=0.5, markersize=markersize, markerfacecolor=colors_adapt_beh[iA], lw=lw, markeredgecolor='white')     
 
         # for iC in range(len(contrasts)):
-        #     axs[0].scatter(np.ones(accu_behaviour.shape[1])*contrasts_value[iC].numpy()+offset[iA], accu_behaviour[iC, :, iA+1], color=adapters_color[iA+1], s=markersize_small, alpha=0.25)
+            # axs[0].scatter(np.ones(accu_behaviour.shape[1])*contrasts_value[iC].numpy()+offset[iA], accu_behaviour[iC, :, iA], color=colors_adapt_beh[iA], s=markersize_small, alpha=0.5)
+            # sns.stripplot(x=np.ones(accu_behaviour.shape[1])*contrasts_value[iC].numpy()+offset[iA], y=accu_behaviour[iC, :, iA], jitter=0.005, ax=axs[0], color=colors_adapt_beh[iA], size=markersize_small, alpha=0.5, native_scale=True, legend=False, zorder=-10)
 
         # adjust axes
         axs[0].spines['top'].set_visible(False)
@@ -234,7 +230,24 @@ def main():
         axs[0].set_title('Human behaviour', fontsize=fontsize_title)
         # inset.set_xticks(contrasts_value)
 
+
+    # color
+    color_none          = plt.cm.get_cmap('tab20c')
+    color_none          = color_none.colors[16:]
+    color_none          = 'lightgrey'
+
+    color_same          = plt.cm.get_cmap('tab20c')
+    color_same          = color_same.colors[:3]
+
+    color_diff          = plt.cm.get_cmap('tab20b')
+    color_diff          = color_diff.colors[8:11]
+
+    colors_adapt_beh    = [color_none, color_same[-2], color_diff[-2]]
+    colors_adapt        = [color_same[-2], color_diff[-2]]
+
+
     # PLOT MODEL PERFORMANCE
+    y_lim = [0.6, 1]
     for iT, current_tempDynamics in enumerate(tempDynamics[1:]):
         for iE, epch in enumerate(epochs):
 
@@ -246,17 +259,18 @@ def main():
                 p_value = stats.ttest_ind(sample1, sample2)[1]
                 print(tempDynamics_label_stats[iT+1], '-', epch, '-', contrasts_value_lbl[iC], '-', p_value)
 
-            # select data
-            data_mean   = np.mean(accu[0, :, iE, :, iA], 1)
-            data_std    = np.std(accu[0, :, iE, : , iA], 1)/math.sqrt(init)
+            # select data (np.zeros((len(tempDynamics), len(contrasts_value), len(epochs), init, 2)) # 2 = same/different)
+            data_mean   = np.mean(accu[0, :, iE, :, 0], 1)
+            data_std    = np.std(accu[0, :, iE, : , 0], 1)/math.sqrt(init)
 
             # visualize
-            axs[iT+1].plot([contrasts_value.numpy(), contrasts_value.numpy()+offset[iA]], [data_mean-data_std, data_mean+data_std], color=color_none, zorder=-1)  
-            axs[iT+1].plot(contrasts_value, data_mean, color=color_none, label=adapter, marker='o', markeredgewidth=0.5, markersize=markersize, markerfacecolor=color_none, markeredgecolor='white', lw=lw)
+            axs[iT+1].plot([contrasts_value.numpy()+offset[0], contrasts_value.numpy()+offset[0]], [data_mean-data_std, data_mean+data_std], color=color_none, zorder=-1)  
+            axs[iT+1].plot(contrasts_value+offset[0], data_mean, color=color_none, label=adapter, marker='o', markeredgewidth=0.5, markersize=markersize, markerfacecolor=color_none, markeredgecolor='white', lw=lw)
 
             # plot per network
             for iC in range(len(contrasts)):
-                axs[iT+1].scatter(np.ones(init)*contrasts_value[iC].numpy(), accu[iT+1, iC, 0, :, iA], color=color_none, s=markersize_small, alpha=0.5)
+                # axs[iT+1].scatter(np.ones(init)*contrasts_value[iC].numpy(), accu[0, iC, 0, :, iA], color=color_none, s=markersize_small, alpha=0.5)
+                sns.stripplot(x=np.ones(init)*contrasts_value[iC].numpy()+offset[0], y=accu[0, iC, 0, :, 0], jitter=0.008, ax=axs[iT+1], color=color_none, size=markersize_small, alpha=0.5, native_scale=True, legend=False, zorder=-10)
 
             # plot networks with temporal adaptation
             for iA, adapter in enumerate(adapters[1:]):
@@ -265,20 +279,14 @@ def main():
                 data_mean   = np.mean(accu[iT+1, :, iE, :, iA], 1)
                 data_std    = np.std(accu[iT+1, :, iE, : , iA], 1)/math.sqrt(init)
 
-                # # visualize
-                # line, = axs[iT+1].plot(contrasts_value+offset[iA], data_mean, color=colors_adapt[iA][-1-iE], label=adapter, marker='o', markersize=markersize, markerfacecolor=colors_adapt[iA][-1-iE], markeredgecolor='white', lw=lw)
-                # patch = axs[iT+1].fill_between(contrasts_value+offset[iA], data_mean - data_std, data_mean + data_std, facecolors=colors_adapt[iA][-1-iE], alpha=0.1, edgecolors='white')
-                # if adapter == 'same':
-                #     lines.append(line)
-                #     patchs.append(patch)
-
                 # visualize
-                axs[iT+1].plot([contrasts_value.numpy()+offset[iA], contrasts_value.numpy()+offset[iA]], [data_mean-data_std, data_mean+data_std], color=colors_adapt[iA], zorder=-1)  
-                axs[iT+1].plot(contrasts_value+offset[iA], data_mean, color=colors_adapt[iA], label=adapter, marker='o', markeredgewidth=0.5, markersize=markersize, markerfacecolor=colors_adapt[iA], markeredgecolor='white', lw=lw)
+                axs[iT+1].plot([contrasts_value.numpy()+offset[iA+1], contrasts_value.numpy()+offset[iA+1]], [data_mean-data_std, data_mean+data_std], color=colors_adapt[iA], zorder=-1)  
+                axs[iT+1].plot(contrasts_value+offset[iA+1], data_mean, color=colors_adapt[iA], label=adapter, marker='o', markeredgewidth=0.5, markersize=markersize, markerfacecolor=colors_adapt[iA], markeredgecolor='white', lw=lw)
 
                 # plot per network
                 for iC in range(len(contrasts)):
-                    axs[iT+1].scatter(np.ones(init)*contrasts_value[iC].numpy()+offset[iA], accu[iT+1, iC, 0, :, iA], color=colors_adapt[iA], s=markersize_small, alpha=0.5)
+                    # axs[iT+1].scatter(np.ones(init)*contrasts_value[iC].numpy()+offset[iA], accu[iT+1, iC, 0, :, iA], color=colors_adapt[iA], s=markersize_small, alpha=0.5)
+                    sns.stripplot(x=np.ones(init)*contrasts_value[iC].numpy()+offset[iA+1], y=accu[iT+1, iC, 0, :, iA], jitter=0.008, ax=axs[iT+1], color=colors_adapt[iA], size=markersize_small, alpha=0.5, native_scale=True, legend=False, zorder=-10)
 
                 # adjust axes
                 axs[iT+1].tick_params(axis='both', labelsize=fontsize_tick)
@@ -291,6 +299,7 @@ def main():
                 axs[iT+1].set_xticks(contrasts_value)
                 axs[iT+1].set_xticklabels(['50', '60', '70', '80', '90'])
                 axs[iT+1].set_xlabel('Contrast (%)', fontsize=fontsize_label)
+                axs[iT+1].set_ylim(y_lim[0], y_lim[1])
                     
     # save figure
     plt.tight_layout()
