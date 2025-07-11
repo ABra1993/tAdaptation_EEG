@@ -21,7 +21,7 @@ fontsize_label          = 12
 fontsize_tick           = 10
 
 ##### SET directories
-root                = '/home/amber/OneDrive/code/nAdaptation_EEG_git/'
+root                = '/home/amber/Documents/organize_code/nAdaptation_EEG_git/'
 
 # initiate figure
 fig, axs = plt.subplots(1, 2, figsize=(10, 3))
@@ -129,7 +129,7 @@ for i in range(2): # accuracy (i == 0) and reaction time (i == 1)
         axs[i].set_ylabel('Reaction time (s)', fontsize=fontsize_label)
     
     axs[i].tick_params(axis='both', labelsize=fontsize_tick)
-    axs[i].set_xlabel('Contrast target image (%)', fontsize=fontsize_label)
+    axs[i].set_xlabel('Target contrast (%)', fontsize=fontsize_label)
     axs[i].set_xticks(offset_iC)
     axs[i].set_xticklabels(contrasts_values, fontsize=fontsize_label)
     axs[i].spines['top'].set_visible(False)

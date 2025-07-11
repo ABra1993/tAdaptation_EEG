@@ -5,11 +5,13 @@ from mne.channels._standard_montage_utils import _read_theta_phi_in_degrees
 from mkFigure456_utils import *
 
 # set root directory
-root        = '/home/amber/OneDrive/code/nAdaptation_EEG_git/'
+root        = '/home/amber/Documents/organize_code/nAdaptation_EEG_git/'
 
 # set figure: ['Fig4A', 'Fig4B', 'Fig4C', 'Fig4D', 'Fig5A', 'Fig5B', 'Fig5C', 'Fig5D', 'Fig6AB']
-# fig_names = ['Fig4A', 'Fig4B', 'Fig4C', 'Fig4D', 'Fig5A', 'Fig5B', 'Fig5C', 'Fig5D', 'Fig6AB']
-fig_names = ['Fig6AB']
+fig_names = ['Fig4A', 'Fig4B', 'Fig4C', 'Fig4D', 'Fig5A', 'Fig5B', 'Fig5C', 'Fig5D', 'Fig6AB']
+
+fig_names = ['Fig5B', 'Fig5C', 'Fig5D']  # for testings
+fig_names = ['Fig6AB']  # for testings
 
 # montage
 fname = root + 'config/chs.tsv'
@@ -69,7 +71,7 @@ img_types                       = [img_type_clean, img_type_single, img_type_rep
 data_clean          = np.load(root + 'data/EEG/data_clean_epochSelection.npy')
 data_single         = np.load(root + 'data/EEG/data_single_epochSelection.npy')
 data_repeated       = np.load(root + 'data/EEG/data_repeated_epochSelection.npy')
-data                = [data_clean, data_single, data_repeated]
+data                = [data_clean*1000, data_single*1000, data_repeated*1000] # convert from V to microVolt
 
 num_nan = np.sum(np.isnan(data_clean))
 print(num_nan)

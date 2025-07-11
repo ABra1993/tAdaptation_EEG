@@ -58,13 +58,14 @@ def visualizeAdapter_topomap(data, montage, info, dict, adapters, fig_name, dir)
 
     # create evoked responses
     times = np.array([0.125, 0.3])
+    adapters_plot = [0, 2, 4]
 
     # initiate figure
-    fig, axs = plt.subplots(len(times), len(adapters), figsize=(9, 4))
+    fig, axs = plt.subplots(len(times), len(adapters_plot), figsize=(9, 4))
 
     # min and maximal voltages
-    vmin = -4000
-    vmax = 4000
+    vmin = -4000000
+    vmax = 4000000
 
     print(data[0].shape)
     print(data[1].shape)
@@ -93,10 +94,11 @@ def visualizeAdapter_topomap(data, montage, info, dict, adapters, fig_name, dir)
         evoked.set_montage(montage=montage)
 
         # plot topomap
-        evoked.plot_topomap(times, ch_type='eeg', time_format='%0.2f',  average=0.05, vlim=(-3500, 3500), contours=0, axes=axs[:, iA], cmap='BrBG', colorbar=False, sensors='k.')
+        evoked.plot_topomap(times, ch_type='eeg',  average=0.05, vlim=(vmin, vmax), contours=0, axes=axs[:, iA], cmap='BrBG', colorbar=False, sensors='k.')
         #  time_format='%0.2f'
 
     # save figure
+    plt.tight_layout()
     plt.savefig(dir + 'visualization/' + fig_name, dpi=600)
     plt.savefig(dir + 'visualization/' + fig_name + '.svg')
 
@@ -127,8 +129,8 @@ def visualizeAdapter_topomap_diff(data, montage, info, dict, adapters, fig_name,
     fig, axs = plt.subplots(len(times), len(adapters)-1, figsize=(6, 4))
 
     # time points
-    vmin = -1500
-    vmax = 1500
+    vmin = -1500000
+    vmax = 1500000
 
     print(data[0].shape)
     print(data[1].shape)
@@ -368,11 +370,11 @@ def visualizeContrast_topomap(data, montage, info, dict, contrasts, fig_name, di
     contrasts_plot = [0, 2, 4]
 
     # min and maximal voltages
-    vmin = -3500
-    vmax = 3500
+    vmin = -3500000
+    vmax = 3500000
 
     # initiate figure
-    fig, axs = plt.subplots(len(times), len(contrasts_plot), figsize=(8, 4))
+    fig, axs = plt.subplots(len(times), len(contrasts_plot), figsize=(9, 4))
 
     print(data[0].shape)
     print(data[1].shape)
@@ -513,9 +515,9 @@ def visualizeContrast(data, t, n_sub, channelNames_current, electrode_idx, contr
             
         elif i == 1:
             axs[i].set_ylabel(r'Mean amplitude ($\mu$V)', fontsize=fontsize_label)
-            axs[i].set_xlabel('Contrast', fontsize=fontsize_label)
+            axs[i].set_xlabel('Target contrast (%)', fontsize=fontsize_label)
             axs[i].set_xticks(offset_iC)
-            axs[i].set_xticklabels([' ', ' ', ' ', ' ', ' '])
+            axs[i].set_xticklabels(['50', '60', '70', '80', '90'])
 
     # save figure
     plt.tight_layout()
@@ -628,7 +630,7 @@ def visualize_AdapterContrast(data, t, n_sub, channelNames_current, electrode_id
         axs[0, i].set_xlabel('Time (s)', fontsize=fontsize_label)
         axs[0, i].axvline(0, color='lightgrey', lw=0.5, zorder=-10)
         axs[0, i].ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-        axs[0, i].set_ylim(-0.004, 0.005)
+        axs[0, i].set_ylim(-4, 5)
         if i == 0:
             axs[0, i].set_ylabel(r'$\mu$V', fontsize=fontsize_label)
 
@@ -641,8 +643,8 @@ def visualize_AdapterContrast(data, t, n_sub, channelNames_current, electrode_id
         # axs[1, i].axvline(0, color='lightgrey', lw=0.5, zorder=-10)
         axs[1, i].ticklabel_format(axis='y', style='sci', scilimits=(0,0))
         axs[1, i].set_xticks(offset_iC)
-        axs[1, i].set_xticklabels([' ', ' ', ' ', ' ', ' '])
-        axs[1, i].set_xlabel('Contrast', fontsize=fontsize_label)
+        axs[1, i].set_xticklabels(['50', '60', '70', '80', '90'])
+        axs[1, i].set_xlabel('Target contrast (%)', fontsize=fontsize_label)
         if i == 0:
             axs[1, i].set_ylabel(r'Mean amplitude ($\mu$V)', fontsize=fontsize_label)
 
@@ -653,5 +655,280 @@ def visualize_AdapterContrast(data, t, n_sub, channelNames_current, electrode_id
     plt.savefig(dir + 'visualization/' + fig_name + '.svg')
 
     return df_stats
+
+
+def visualizeContrastAdapter_CCN24(data, t, n_sub, channelNames_current, electrode_idx, adapters, contrasts, contrasts_value, fig_name, dir):
+
+    # initiate figure
+    fig, axs = plt.subplots(1, 4, figsize=(10, 2))
+    fig.subplots_adjust(wspace=1.5)
+
+    ################################################################## ADAPTER
+    ##################################################################
+    ##################################################################
+
+    # concatenate data
+    data_concat = np.zeros((21, 5, 3, 32, 64, 154))
+    data_concat[:, :, :1, :, :, :]         = data[0]
+    data_concat[:, :, 1:, :, :, :]         = data[1]
+    # print(data_concat.shape)
+
+    # visualize different contrast levels for repeated trials
+    color = ['gray', 'dodgerblue', np.array([212, 170, 0])/255]
+
+    # visualize absolute values
+    for iA, adapter in enumerate(adapters):
+
+        # select data
+        data_current = data_concat[:, :, iA, :, electrode_idx, :]
+        data_current = np.nanmean(np.nanmean(np.nanmean(data_current, 0), 1), 1)
+
+        # reshape and average
+        data_mean = np.nanmean(data_current, 0)
+        data_std = np.nanstd(data_current, 0)/math.sqrt(n_sub)
+
+        # plot
+        axs[0].plot(t, data_mean, label=adapter, color=color[iA], lw=2)
+        axs[0].fill_between(t, data_mean - data_std, data_mean + data_std, alpha=0.2, color=color[iA])
+
+    # compute data
+    data_current_temp = np.nanmean(data[1], 2).squeeze() - data[0].squeeze()
+    data_current_temp = data_current_temp[:, :, :, electrode_idx, :]
+    data_current_temp = np.nanmean(np.nanmean(np.nanmean(data_current_temp, 1), 1), 1)
+
+    # compute timepoints where responses are significant
+    p_values = np.zeros(len(t))
+    for tmp in range(len(t)):
+
+        # parametric
+        p_values[tmp] = stats.ttest_1samp(data_current_temp[:, tmp], 0)[1]
+
+    # MC correction
+    # _, p_values, _, _ = multipletests(p_values, method='fdr_bh')
+    pvals_corrected_sign = np.argwhere(p_values < 0.05).flatten()
+
+    # define time windows
+    idx_time_windows = []
+    start_idx = None
+
+    for i in range(len(pvals_corrected_sign) - 1):
+        if pvals_corrected_sign[i + 1] - pvals_corrected_sign[i] == 1:
+            if start_idx is None:
+                start_idx = pvals_corrected_sign[i]
+        else:
+            if start_idx is not None:
+                idx_time_windows.append([start_idx, pvals_corrected_sign[i]])
+                start_idx = None
+
+    # Check if there are consecutive numbers at the end of the array
+    if start_idx is not None:
+        idx_time_windows.append([start_idx, pvals_corrected_sign[-1]])
+
+    # compute response magnitude differences
+    time_windows    = len(idx_time_windows)
+    timepoints      = np.zeros((time_windows,  2))
+
+    # plot time ranges
+    count = 0
+    for _, idx in enumerate(idx_time_windows):
+
+        if (t[idx[0]] < 0):
+            continue
+        else:
+
+            # retrieve timepoints
+            start = t[idx[0]]
+            end = t[idx[1]]
+            timepoints[count, 0] = start
+            timepoints[count, 1] = end
+
+            # visualize 
+            axs[0].axvspan(start, end, facecolor='lightsalmon', alpha=0.3, edgecolor='white')
+
+        # increment count
+        count = count + 1
+
+    # visualize relative values
+    data_none = data_concat[:, :, 0, :, electrode_idx, :]
+
+    # save response magnitudes
+    AUC             = np.zeros((len(adapters)-1, time_windows, n_sub))
+
+    # save x-ticks
+    offset = [-0.1, 0.1]
+    for iA, adapter in enumerate(adapters[1:]):
+
+        # select data
+        data_current = data_concat[:, :, iA+1, :, electrode_idx, :] - data_none
+        # print(data_current.shape)
+
+        # reshape and average
+        data_mean = np.mean(np.nanmean(np.nanmean(np.nanmean(data_current, 0), 1), 1), 0)
+        data_std = np.nanstd(np.nanmean(np.nanmean(np.nanmean(data_current, 0), 1), 1), 0)/math.sqrt(n_sub)
+
+        # visualize time windows and response magnitudes
+        count = 0
+        for _, idx in enumerate(idx_time_windows):
+
+            if (t[idx[0]] < 0):
+                continue
+            else:
+
+                # compute AUC
+                for iS in range(n_sub):
+                    # data_temp = data_current[:, iS, :, :, idx[0]:idx[1]].mean(0).mean(0).mean(0)
+                    data_temp = data_current[:, iS, :, :, :]
+                    data_temp = data_temp.reshape(data_temp.shape[0]*data_temp.shape[1]*data_temp.shape[2], data_temp.shape[3])
+                    data_temp = np.nanmean(data_temp[:, idx[0]:idx[1]], 0)
+                    AUC[iA, count, iS] = np.nanmean(data_temp)
+
+                # compute metrics
+                data_mean = np.nanmean(AUC[iA, count, :])
+                data_std = np.nanstd(AUC[iA, count, :])/math.sqrt(n_sub)
+
+                # axs[2].scatter(np.ones(n_sub)*iIdx+offset[iA], AUC_current, color=color[iA+1], s=5, alpha=0.1)
+                axs[1].plot([count+offset[iA], count+offset[iA]], [data_mean - data_std, data_mean + data_std], color=color[iA+1], zorder=-10)
+                axs[1].scatter(count+offset[iA], data_mean, facecolor=color[iA+1], edgecolor='white', s=80)
+
+                # increment count
+                count = count + 1
+
+    # statistics
+    print('---------- same vs. different')
+    for iT in range(count):
+        print('Time window ', iT+1)
+        result = stats.ttest_rel(AUC[0, iT, :], AUC[1, iT, :])
+        print(result)
+
+    # create labels for x ticks
+    x_ticklabels = []
+    for iT in range(count):
+        x_ticklabels.append(str(np.round(timepoints[iT, 0], 2)) + ' s - ' + str(np.round(timepoints[iT, 1], 2)) + ' s')
+    # print(x_ticklabels)
+    print(timepoints*1000)
+
+    # adjust axes
+    for i in range(2):
+
+        axs[i].tick_params(axis='both', labelsize=fontsize_tick)
+        axs[i].axhline(0, color='lightgrey', lw=0.5, zorder=-10)
+        axs[i].spines['top'].set_visible(False)
+        axs[i].spines['right'].set_visible(False)
+
+        if i == 0:
+            axs[i].axhline(0, color='lightgrey', lw=0.5, zorder=-10)
+            axs[i].axvline(0, color='lightgrey', lw=0.5, zorder=-10)
+            # axs[i].set_ylabel(r'$\mu$V', fontsize=fontsize_label)
+            # axs[i].set_xlabel('Time (s)', fontsize=fontsize_label)
+            axs[i].ticklabel_format(axis='y', style='sci', scilimits=(0,0))
+        elif i == 1:
+            axs[i].axvline(0, color='lightgrey', lw=0.5, zorder=-10)
+            # axs[i].set_ylabel('adapter - blank \n ERP amplitude ($\mu$V)', fontsize=fontsize_label)
+            # axs[i].set_xlabel('Time (s)', fontsize=fontsize_label)
+            axs[i].ticklabel_format(axis='y', style='sci', scilimits=(0,0))
+            axs[i].set_xticklabels([' ', ' ', ' '])
+
+        
+    ################################################################## CONTRAST
+    ##################################################################
+    ##################################################################
+
+    t_start     = np.argwhere(t > 0.260)[0][0] # tmin = -0.2
+    t_end       = np.argwhere(t > 0.350)[0][0] # tmin = -0.2
+
+    # visualize 
+    axs[2].axvspan(t[t_start], t[t_end], facecolor='lightsalmon', alpha=0.3, edgecolor='white')
+
+    # concatenate data
+    data_concat = np.zeros((21, 5, 3, 32, 64, 154))
+    data_concat[:, :, :1, :, :, :]         = data[0]
+    data_concat[:, :, 1:, :, :, :]         = data[1]
+
+    t_start     = np.argwhere(t > 0.280)[0][0] # tmin = -0.2
+    t_end       = np.argwhere(t > 0.320)[0][0] # tmin = -0.2
+
+    # data to store response magnitude
+    AUC = np.zeros((n_sub, len(contrasts)))
+
+    # visualize different contrast levels for repeated trials
+    cmap = plt.cm.get_cmap('cool')
+    color = cmap(np.linspace(0, 1, len(contrasts)))
+
+    offset_iC = [0, 3, 6, 9, 12]
+    offset_iC = [0, 1, 2, 3, 4]
+    
+    # initiate slope
+    slope = np.zeros(n_sub)
+
+    for iC, contrast in enumerate(contrasts):
+        print(contrasts)
+
+        # select data
+        data_current = data_concat[:, iC, :, :, electrode_idx, :]
+        # print(data_current.shape)
+        data_current = np.nanmean(np.nanmean(np.nanmean(data_current, 0), 1), 1)
+        # print(data_current.shape)
+
+        # reshape and average
+        data_mean = np.nanmean(data_current, 0)
+        data_std = np.nanstd(data_current, 0)/math.sqrt(n_sub)
+
+        # plot
+        axs[2].plot(t, data_mean, label=contrasts_value[iC], color=color[iC])
+        axs[2].fill_between(t, data_mean - data_std, data_mean + data_std, alpha=0.2, color=color[iC])
+
+        # plot response magnitude
+        for iS in range(n_sub):
+            data_current = np.nanmean(np.nanmean(np.nanmean(data_concat[iS, iC, :, :, electrode_idx, :], 0), 0), 0)
+            AUC[iS, iC] = np.nanmean(data_current[t_start:t_end])
+        mean            = np.nanmean(AUC[:, iC])
+        std             = np.nanstd(AUC[:, iC])/math.sqrt(n_sub)
+
+        axs[3].plot([offset_iC[iC], offset_iC[iC]], [mean-std, mean+std], color='grey', zorder=-1)       
+        axs[3].scatter(offset_iC[iC], mean, edgecolors='white', color=color[iC], s=40)
+        sns.stripplot(x=np.ones(n_sub)*offset_iC[iC], y=AUC[:, iC], jitter=True, ax=axs[3], color=color[iC], size=4, alpha=0.3, native_scale=True)
+
+    # regression analysis
+    pred = np.zeros((n_sub, len(contrasts)))
+    for iS in range(n_sub):
+        lm = LinearRegression()
+        model = LinearRegression().fit(np.arange(len(contrasts)).reshape(-1, 1), AUC[iS, :])
+        slope[iS] = model.coef_
+        pred[iS, :] = model.predict(np.arange(len(contrasts)).reshape(-1, 1))
+    axs[3].plot(np.arange(len(contrasts)), np.mean(pred, 0), color='grey', alpha=0.5, zorder=-10)
+    
+    # statistics
+    results = stats.ttest_1samp(slope, 0)
+    print(channelNames_current)
+    print('Slope 1-sample T-test:'.ljust(25), results)
+    print('\n')
+
+    # adjust axes
+    for i in range(2, 4):
+
+        axs[i].tick_params(axis='both', labelsize=fontsize_tick)
+        axs[i].spines['top'].set_visible(False)
+        axs[i].spines['right'].set_visible(False)
+        axs[i].axhline(0, color='lightgrey', lw=0.5, zorder=-10)
+        axs[i].ticklabel_format(axis='y', style='sci', scilimits=(0,0))
+
+        if i == 0:
+            # axs[i].legend(bbox_to_anchor=(0, 1.02, 1, 0.2), loc="lower left",
+                # mode="expand", borderaxespad=0, title='Contrast level', fontsize=fontsize_legend, frameon=False, ncol=len(contrasts))
+            axs[i].set_ylabel(r'$\mu$V', fontsize=fontsize_label)
+            axs[i].set_xlabel('Time (s)', fontsize=fontsize_label)
+            axs[i].axvline(0, color='lightgrey', lw=0.5, zorder=-10)
+            # axs[i].axvspan(t[t_start], t[t_end], facecolor='lightgrey', edgecolor='white', zorder=-1., alpha=0.5)
+            
+        elif i == 3:
+            # axs[i].set_ylabel(r'Mean amplitude ($\mu$V)', fontsize=fontsize_label)
+            # axs[i].set_xlabel('Contrast', fontsize=fontsize_label)
+            axs[i].set_xticks(offset_iC)
+            axs[i].set_xticklabels([' ', ' ', ' ', ' ', ' '])
+
+    # save figure
+    plt.tight_layout()
+    plt.savefig(dir + 'visualization/adapterContrast_CCN24', dpi=600)
+    plt.savefig(dir + 'visualization/adapterContrast_CCN24.svg')
 
 

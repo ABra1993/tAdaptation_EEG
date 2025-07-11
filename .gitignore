@@ -1,8 +1,15 @@
 __pycache__/*
 data/*
 models/__pycache__
+models/decoding
+models/performance
+models/robustness
+models/variableGain
 models/weights
 models/dataset
 visualization/*
 visualization/preprocessing_epochSelection/
 old_scripts/
+model_train_vGain.py
+mkFigure456_CCN24.py
+mkFigure8CD_CCN24.py
