@@ -209,8 +209,8 @@ def main():
 
                     # save figure
                     plt.tight_layout()
-                    plt.savefig(root + 'visualization/SFig4_init' + str(iInit+1), dpi=300)
-                    plt.savefig(root + 'visualization/SFig4_init' + str(iInit+1) + '.svg')
+                    plt.savefig(root + 'visualization/SFig4-7_init' + str(iInit+1), dpi=300)
+                    plt.savefig(root + 'visualization/SFig4-7_init' + str(iInit+1) + '.svg')
 
 
 if __name__ == "__main__":
